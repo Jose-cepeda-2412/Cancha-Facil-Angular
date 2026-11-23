@@ -6,7 +6,7 @@ import { Espacio } from '../../models/espacio.model';
 import { EspacioService } from '../../services/espacio.service';
 import { AuthService } from '../../services/auth.service';
 import { EspacioForm } from '../espacio-form/espacio-form.component'; // Componente hijo.
-import { BotonPagarComponent } from '../../pagos/boton-pagar.component'; // Pago con Wompi.
+import { PagoSimulado } from '../pago-simulado/pago-simulado.component'; // Pago simulado.
 
 // Formato colombiano para el pipe currency: $ 80.000 en lugar de $80,000.
 registerLocaleData(localeEsCo);
@@ -19,7 +19,7 @@ interface Mensaje {
 
 @Component({
   standalone: true,
-  imports: [CurrencyPipe, UpperCasePipe, EspacioForm, BotonPagarComponent],
+  imports: [CurrencyPipe, UpperCasePipe, EspacioForm, PagoSimulado],
   selector: 'app-espacios',
   styleUrl: './espacios.component.css',
   templateUrl: './espacios.component.html',
