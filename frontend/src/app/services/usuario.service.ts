@@ -2,10 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Usuario } from '../models/usuario.model';
+import { environment } from '../../environments/environment';
 
 
-// Servicio con la lógica de los usuarios. Mientras Angular no se conecte al
-// backend (/api/usuarios), guarda los usuarios temporalmente en un arreglo.
+// Servicio HTTP del CRUD de usuarios; usa el mismo backend que el login.
 @Injectable({
   providedIn: 'root',
 })
@@ -13,7 +13,7 @@ export class UsuarioService {
   
 
   private readonly http = inject(HttpClient);
-  private readonly url = 'http://localhost:8080/api/usuarios';
+  private readonly url = `${environment.apiUrl}/api/usuarios`;
   
   
   //crud de usuario

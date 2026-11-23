@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core';
 import { Observable, delay, of, throwError } from 'rxjs';
 import { Espacio, Pagina } from '../models/espacio.model';
+import { environment } from '../../environments/environment';
 
 // Servicio que centraliza la comunicación con el backend para los espacios.
 // Los componentes nunca llaman a HttpClient directamente: siempre pasan por aquí.
@@ -13,7 +14,7 @@ export class EspacioService {
   private http = inject(HttpClient);
 
   // Dirección del EspacioRestController de Spring Boot.
-  private readonly apiUrl = 'http://localhost:8080/api/espacios';
+  private readonly apiUrl = `${environment.apiUrl}/api/espacios`;
 
   // true  = usa datos de prueba en memoria (mientras el backend de espacios no está listo).
   // false = hace las peticiones HTTP reales a Spring Boot.

@@ -3,8 +3,15 @@
 > **Carpeta activa del frontend de CanchaFácil.** El inicio de sesión, la
 > consulta de sesión, el logout y los guards de rutas están documentados en
 > [`SESION.md`](./SESION.md). Contrato del backend: `backend/SEGURIDAD.md`.
-> Arranque local: backend en `http://localhost:8080` y `npm start` aquí
-> (`http://localhost:4200`).
+> Arranque: `npm start` aquí (`http://localhost:4200`). El backend configurado es
+> `https://backend-canchafacil.onrender.com`; no hace falta levantar Spring local.
+> La URL se centraliza en `src/environments/environment.ts` para login y CRUD.
+>
+> Para la sesión entre localhost y Render, el backend debe admitir el origen del
+> frontend con credenciales y emitir la cookie con `SameSite=None; Secure`.
+> En Render se puede configurar `SERVER_SERVLET_SESSION_COOKIE_SAME_SITE=none`
+> y `SERVER_SERVLET_SESSION_COOKIE_SECURE=true`. El navegador también debe permitir
+> esas cookies entre sitios; un bloqueo de cookies de terceros puede impedir el login.
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
 
