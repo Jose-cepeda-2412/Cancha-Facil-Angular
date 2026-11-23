@@ -100,8 +100,8 @@
             </div>
             <span class="insignia insignia-gris">Negocio #{{ espacio.negocioId }}</span>
           </div>
-          <!-- Pago con Wompi: cobra una hora de la cancha -->
-          <app-boton-pagar class="pagar-cancha" [monto]="espacio.precioHora" [descripcion]="'1 hora en ' + espacio.nombre" />
+          <!-- Pago simulado: solo con sesión iniciada (no llama a ninguna pasarela) -->
+          <app-pago-simulado class="pagar-cancha" [monto]="espacio.precioHora" [cancha]="espacio.nombre" />
           <!-- Editar y Eliminar solo para ADMIN -->
           @if (auth.esAdmin()) {
             <div class="acciones-admin">

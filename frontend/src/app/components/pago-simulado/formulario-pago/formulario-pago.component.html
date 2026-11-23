@@ -1,0 +1,163 @@
+<!-- <dialog> nativo con showModal(): se dibuja en la capa superior del navegador,
+     encima de toda la página, con fondo oscuro (::backdrop). Clic fuera = cerrar. -->
+<dialog #ventana class="ventana" aria-labelledby="titulo-pago" (cancel)="$event.preventDefault()" (click)="clicFuera($event)">
+<div class="contenido">
+  <header class="cabecera">
+    <div>
+      <h2 id="titulo-pago">Pago de la reserva</h2>
+      <p>1 hora en <strong>{{ cancha() }}</strong></p>
+    </div>
+    <button class="cerrar" type="button" aria-label="Cerrar" (click)="cerrar()" [disabled]="procesando()">✕</button>
+  </header>
+
+  <div class="total">
+    <span>Total a pagar</span>
+    <strong>{{ monto() | currency: 'COP' : 'symbol-narrow' : '1.0-0' : 'es-CO' }}</strong>
+  </div>
+
+  <p class="alerta alerta-info aviso">
+    <strong>Simulación.</strong> No se cobra nada y los datos no salen de tu navegador.
+    No escribas datos reales: usa la tarjeta de prueba <code>{{ tarjetaDePrueba }}</code>.
+  </p>
+
+  <!-- Método de pago -->
+  <div class="metodos" role="radiogroup" aria-label="Método de pago">
+    <button type="button" role="radio" [attr.aria-checked]="metodo() === 'tarjeta'" [class.activo]="metodo() === 'tarjeta'" (click)="cambiarMetodo('tarjeta')">
+      💳 Tarjeta
+    </button>
+    <button type="button" role="radio" [attr.aria-checked]="metodo() === 'pse'" [class.activo]="metodo() === 'pse'" (click)="cambiarMetodo('pse')">
+      🏦 PSE
+    </button>
+    <button type="button" role="radio" [attr.aria-checked]="metodo() === 'nequi'" [class.activo]="metodo() === 'nequi'" (click)="cambiarMetodo('nequi')">
+      📱 Nequi
+    </button>
+  </div>
+
+  @switch (metodo()) {
+    @case ('tarjeta') {
+      <form [formGroup]="tarjeta" (ngSubmit)="pagar()" autocomplete="off" novalidate>
+        <div class="campo-form">
+          <label for="numero">
+            Número de la tarjeta
+            @if (tarjeta.controls.numero.value) {
+              <span class="franquicia">{{ franquiciaActual() }}</span>
+            }
+          </label>
+          <input id="numero" class="control" formControlName="numero" inputmode="numeric" placeholder="0000 0000 0000 0000"
+                 autocomplete="off" (input)="formatearNumero()" [class.campo-invalido]="invalido(tarjeta, 'numero')" />
+          @if (invalido(tarjeta, 'numero')) {
+            <span class="error-campo">Número de tarjeta no válido.</span>
+          }
+        </div>
+
+        <div class="campo-form">
+          <label for="titular">Nombre como aparece en la tarjeta</label>
+          <input id="titular" class="control" formControlName="titular" placeholder="NOMBRE APELLIDO" autocomplete="off"
+                 [class.campo-invalido]="invalido(tarjeta, 'titular')" />
+          @if (invalido(tarjeta, 'titular')) {
+            <span class="error-campo">Escribe el nombre del titular.</span>
+          }
+        </div>
+
+        <div class="fila">
+          <div class="campo-form">
+            <label for="vencimiento">Vencimiento</label>
+            <input id="vencimiento" class="control" formControlName="vencimiento" inputmode="numeric" placeholder="MM/AA"
+                   autocomplete="off" (input)="formatearFecha()" [class.campo-invalido]="invalido(tarjeta, 'vencimiento')" />
+            @if (invalido(tarjeta, 'vencimiento')) {
+              <span class="error-campo">Fecha no válida o vencida.</span>
+            }
+          </div>
+          <div class="campo-form">
+            <label for="cvv">CVV</label>
+            <input id="cvv" class="control" type="password" formControlName="cvv" inputmode="numeric" placeholder="123"
+                   autocomplete="off" (input)="limitarDigitos(tarjeta.controls.cvv, 4)" [class.campo-invalido]="invalido(tarjeta, 'cvv')" />
+            @if (invalido(tarjeta, 'cvv')) {
+              <span class="error-campo">3 o 4 dígitos.</span>
+            }
+          </div>
+          <div class="campo-form">
+            <label for="cuotas">Cuotas</label>
+            <select id="cuotas" class="control" formControlName="cuotas">
+              @for (n of [1, 2, 3, 6, 12]; track n) {
+                <option [ngValue]="n">{{ n }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <ng-container *ngTemplateOutlet="acciones"></ng-container>
+      </form>
+    }
+
+    @case ('pse') {
+      <form [formGroup]="pse" (ngSubmit)="pagar()" novalidate>
+        <div class="campo-form">
+          <label for="banco">Banco</label>
+          <select id="banco" class="control" formControlName="banco" [class.campo-invalido]="invalido(pse, 'banco')">
+            <option value="" disabled>Selecciona tu banco</option>
+            @for (banco of bancos; track banco) {
+              <option [value]="banco">{{ banco }}</option>
+            }
+          </select>
+          @if (invalido(pse, 'banco')) {
+            <span class="error-campo">Selecciona un banco.</span>
+          }
+        </div>
+
+        <div class="campo-form">
+          <span class="etiqueta-campo">Tipo de persona</span>
+          <div class="opciones">
+            <label><input type="radio" formControlName="tipoPersona" value="natural" /> Natural</label>
+            <label><input type="radio" formControlName="tipoPersona" value="juridica" /> Jurídica</label>
+          </div>
+        </div>
+
+        <div class="campo-form">
+          <label for="correo-pse">Correo para el comprobante</label>
+          <input id="correo-pse" class="control" type="email" formControlName="correo" placeholder="tu@correo.com"
+                 [class.campo-invalido]="invalido(pse, 'correo')" />
+          @if (invalido(pse, 'correo')) {
+            <span class="error-campo">Escribe un correo válido.</span>
+          }
+        </div>
+
+        <ng-container *ngTemplateOutlet="acciones"></ng-container>
+      </form>
+    }
+
+    @case ('nequi') {
+      <form [formGroup]="nequi" (ngSubmit)="pagar()" novalidate>
+        <div class="campo-form">
+          <label for="celular">Celular registrado en Nequi</label>
+          <input id="celular" class="control" formControlName="celular" inputmode="numeric" placeholder="3001234567"
+                 (input)="limitarDigitos(nequi.controls.celular, 10)" [class.campo-invalido]="invalido(nequi, 'celular')" />
+          @if (invalido(nequi, 'celular')) {
+            <span class="error-campo">Celular de 10 dígitos que empiece por 3.</span>
+          }
+        </div>
+        <p class="ayuda">En un pago real recibirías una notificación en la app para aprobarlo.</p>
+
+        <ng-container *ngTemplateOutlet="acciones"></ng-container>
+      </form>
+    }
+  }
+
+  <!-- Botones y mensajes comunes a los tres métodos -->
+  <ng-template #acciones>
+    @if (mensajeError()) {
+      <p class="alerta alerta-error mensaje" role="alert">{{ mensajeError() }}</p>
+    }
+    <div class="botones">
+      <button class="btn btn-neutro" type="button" (click)="cerrar()" [disabled]="procesando()">Cancelar</button>
+      <button class="btn btn-primario" type="submit" [disabled]="procesando()">
+        @if (procesando()) {
+          <span class="spinner"></span> Procesando…
+        } @else {
+          Pagar {{ monto() | currency: 'COP' : 'symbol-narrow' : '1.0-0' : 'es-CO' }}
+        }
+      </button>
+    </div>
+  </ng-template>
+</div>
+</dialog>

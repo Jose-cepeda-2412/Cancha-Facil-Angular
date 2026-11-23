@@ -77,7 +77,7 @@
   gap: 0.5rem;
 }
 
-/* Botón de pago con Wompi en cada tarjeta */
+/* Pago simulado en cada tarjeta (solo con sesión) */
 .pagar-cancha {
   margin-top: 0.75rem;
 }
